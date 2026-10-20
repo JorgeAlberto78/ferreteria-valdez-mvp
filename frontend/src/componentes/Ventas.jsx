@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api, { bs, mensajeError } from "../api.js";
+import Nota from "./Nota.jsx";
 
 export default function Ventas() {
   const [productos, setProductos] = useState([]);
@@ -68,114 +69,110 @@ export default function Ventas() {
     }
   };
 
+  const filas = carrito.map((i) => ({
+    id: i.producto.id,
+    cant: i.cantidad,
+    desc: i.producto.nombre,
+    unit: i.producto.precio_venta,
+    quitar: () => quitar(i.producto.id),
+  }));
+
   return (
-    <div className="grid gap-6 lg:grid-cols-3">
-      <div className="card space-y-4 lg:col-span-2">
-        <h2 className="text-lg font-bold">Nueva venta</h2>
-        <div className="flex flex-wrap gap-2">
-          <select className="input flex-1" value={productoId} onChange={(e) => setProductoId(e.target.value)}>
-            <option value="">Elige un producto...</option>
-            {productos.map((p) => (
-              <option key={p.id} value={p.id} disabled={p.stock_actual === 0}>
-                {p.nombre} — {bs(p.precio_venta)} (stock {p.stock_actual})
-              </option>
-            ))}
-          </select>
-          <input className="input w-24" type="number" min="1" value={cantidad} onChange={(e) => setCantidad(e.target.value)} />
-          <button className="btn" onClick={agregar} disabled={!productoId}>
-            Agregar
-          </button>
-        </div>
+    <div className="grid gap-6 lg:grid-cols-[1fr_17rem]">
+      <div className="min-w-0 space-y-5">
+        <h2 className="titulo-pagina !mb-0">Nueva venta</h2>
 
-        <table className="w-full">
-          <thead className="border-b border-stone-200">
-            <tr>
-              <th className="th">Producto</th>
-              <th className="th text-right">Cant.</th>
-              <th className="th text-right">P. unit.</th>
-              <th className="th text-right">Subtotal</th>
-              <th className="th"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-stone-100">
-            {carrito.map((i) => (
-              <tr key={i.producto.id}>
-                <td className="td">{i.producto.nombre}</td>
-                <td className="td text-right">{i.cantidad}</td>
-                <td className="td text-right">{bs(i.producto.precio_venta)}</td>
-                <td className="td text-right">{bs(i.cantidad * i.producto.precio_venta)}</td>
-                <td className="td text-right">
-                  <button className="btn-sec" onClick={() => quitar(i.producto.id)}>
-                    Quitar
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {carrito.length === 0 && (
-              <tr>
-                <td className="td text-stone-500" colSpan={5}>
-                  Todavía no agregaste productos.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-
-        <div className="grid gap-3 sm:grid-cols-3">
-          <div>
-            <label className="mb-1 block text-xs font-medium text-stone-600">Cliente (opcional)</label>
-            <select className="input" value={clienteId} onChange={(e) => setClienteId(e.target.value)}>
-              <option value="">Sin cliente</option>
-              {clientes.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.nombre}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium text-stone-600">Método de pago</label>
-            <select className="input" value={metodo} onChange={(e) => setMetodo(e.target.value)}>
-              <option value="efectivo">Efectivo</option>
-              <option value="qr">QR</option>
-            </select>
-          </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium text-stone-600">Descuento (Bs)</label>
-            <input className="input" type="number" min="0" step="0.01" value={descuento} onChange={(e) => setDescuento(e.target.value)} />
+        <div className="panel">
+          <p className="label">Agregar a la nota</p>
+          <div className="flex flex-wrap items-end gap-3">
+            <div className="min-w-[14rem] flex-1">
+              <select className="input" aria-label="Producto" value={productoId} onChange={(e) => setProductoId(e.target.value)}>
+                <option value="">Elige un producto...</option>
+                {productos.map((p) => (
+                  <option key={p.id} value={p.id} disabled={p.stock_actual === 0}>
+                    {p.nombre} — {bs(p.precio_venta)} (stock {p.stock_actual})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="w-24">
+              <input className="input" type="number" min="1" aria-label="Cantidad" value={cantidad} onChange={(e) => setCantidad(e.target.value)} />
+            </div>
+            <button className="btn" onClick={agregar} disabled={!productoId}>
+              Agregar
+            </button>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-stone-200 pt-3">
-          <div className="text-sm text-stone-600">
-            Subtotal {bs(subtotal)} · <span className="text-lg font-bold text-marca-oscuro">Total {bs(total)}</span>
+        <Nota titulo="Nota de venta" filas={filas} vacio="Todavía no agregaste productos a esta venta." />
+
+        <div className="panel space-y-4">
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div>
+              <label className="label">Cliente (opcional)</label>
+              <select className="input" value={clienteId} onChange={(e) => setClienteId(e.target.value)}>
+                <option value="">Sin cliente</option>
+                {clientes.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="label">Método de pago</label>
+              <select className="input" value={metodo} onChange={(e) => setMetodo(e.target.value)}>
+                <option value="efectivo">Efectivo</option>
+                <option value="qr">QR</option>
+              </select>
+            </div>
+            <div>
+              <label className="label">Descuento (Bs)</label>
+              <input className="input" type="number" min="0" step="0.01" value={descuento} onChange={(e) => setDescuento(e.target.value)} />
+            </div>
           </div>
-          <button className="btn" onClick={confirmar} disabled={carrito.length === 0}>
-            Confirmar venta
-          </button>
+
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="total-caja min-w-[16rem] flex-1 sm:flex-none">
+              <span className="text-base text-tinta">Total</span>
+              <span className="font-titulo text-4xl font-bold text-tinta-oscuro">{bs(total)}</span>
+            </div>
+            <button className="btn !h-12 px-8 text-lg" onClick={confirmar} disabled={carrito.length === 0}>
+              Confirmar venta
+            </button>
+          </div>
+          {Number(descuento) > 0 && <p className="text-sm text-stone-600">Subtotal {bs(subtotal)} menos descuento {bs(descuento)}.</p>}
+          {ok && (
+            <p role="status" className="aviso-ok">
+              {ok}
+            </p>
+          )}
+          {error && (
+            <p role="alert" className="aviso-error">
+              {error}
+            </p>
+          )}
         </div>
-        {ok && <p className="rounded bg-green-50 px-3 py-2 text-sm text-green-700">{ok}</p>}
-        {error && <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
       </div>
 
-      <div className="card">
-        <h3 className="mb-2 font-semibold">Últimas ventas</h3>
-        <ul className="divide-y divide-stone-100 text-sm">
+      <aside className="panel h-fit">
+        <h3 className="subtitulo mb-2">Últimas ventas</h3>
+        <ul className="divide-y divide-tinta-linea/60">
           {ventas.map((v) => (
-            <li key={v.id} className="py-2">
-              <div className="flex justify-between">
-                <span className="font-medium">Venta #{v.id}</span>
-                <span>{bs(v.total)}</span>
+            <li key={v.id} className="py-2.5">
+              <div className="flex justify-between gap-2">
+                <span className="font-semibold">Venta #{v.id}</span>
+                <span className="font-semibold">{bs(v.total)}</span>
               </div>
-              <p className="text-xs text-stone-500">
+              <p className="text-sm text-stone-600">
                 {new Date(v.fecha + "Z").toLocaleString()} · {v.metodo_pago.toUpperCase()}
                 {v.cliente_nombre ? ` · ${v.cliente_nombre}` : ""}
               </p>
             </li>
           ))}
-          {ventas.length === 0 && <li className="py-2 text-stone-500">Sin ventas todavía.</li>}
+          {ventas.length === 0 && <li className="py-2 text-base text-stone-600">Todavía no hay ventas. La primera aparecerá aquí.</li>}
         </ul>
-      </div>
+      </aside>
     </div>
   );
 }

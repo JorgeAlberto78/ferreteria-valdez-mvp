@@ -15,6 +15,15 @@ const VACIO = {
   stock_minimo: 0,
 };
 
+function Campo({ etiqueta, className = "", children }) {
+  return (
+    <div className={className}>
+      <label className="label">{etiqueta}</label>
+      {children}
+    </div>
+  );
+}
+
 export default function Productos({ usuario }) {
   const esAdmin = usuario.rol === "admin";
   const [productos, setProductos] = useState([]);
@@ -74,44 +83,46 @@ export default function Productos({ usuario }) {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="card lg:col-span-2">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <h2 className="text-lg font-bold">Productos</h2>
-            <input className="input max-w-xs" placeholder="Buscar por nombre o código" value={buscar} onChange={(e) => setBuscar(e.target.value)} />
+      <div className="grid gap-6 lg:grid-cols-[1fr_18rem]">
+        <div className="panel min-w-0">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="titulo-pagina !mb-0">Productos</h2>
+            <input className="input max-w-xs" placeholder="Buscar por nombre o código" aria-label="Buscar producto" value={buscar} onChange={(e) => setBuscar(e.target.value)} />
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="border-b border-stone-200">
+              <thead>
                 <tr>
                   <th className="th">Código</th>
                   <th className="th">Producto</th>
-                  <th className="th">Categoría</th>
-                  <th className="th text-right">Precio venta</th>
+                  <th className="th text-right">Precio</th>
                   <th className="th text-right">Stock</th>
                   <th className="th"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-100">
+              <tbody className="divide-y divide-tinta-linea/60">
                 {productos.map((p) => {
                   const bajo = p.stock_actual <= p.stock_minimo;
                   return (
-                    <tr key={p.id} className={seleccion?.id === p.id ? "bg-amber-50" : ""}>
-                      <td className="td font-mono text-xs">{p.codigo}</td>
-                      <td className="td">{p.nombre}</td>
-                      <td className="td">{p.categoria}</td>
-                      <td className="td text-right">{bs(p.precio_venta)}</td>
+                    <tr key={p.id} className={seleccion?.id === p.id ? "bg-obra/15" : ""}>
+                      <td className="td whitespace-nowrap text-sm text-stone-600">{p.codigo}</td>
+                      <td className="td">
+                        <span className="font-medium">{p.nombre}</span>
+                        {p.categoria && <span className="block text-sm text-stone-600">{p.categoria}</span>}
+                      </td>
+                      <td className="td whitespace-nowrap text-right font-semibold">{bs(p.precio_venta)}</td>
                       <td className="td text-right">
-                        <span className={`rounded px-2 py-0.5 text-xs font-semibold ${bajo ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}>
+                        <span className={`chip ${bajo ? "bg-etiqueta/10 text-etiqueta" : "bg-cal/10 text-cal"}`}>
                           {p.stock_actual} {p.unidad_medida}
+                          {bajo ? " · bajo" : ""}
                         </span>
                       </td>
-                      <td className="td space-x-1 text-right">
+                      <td className="td space-x-1 whitespace-nowrap text-right">
                         <button className="btn-sec" onClick={() => setSeleccion(p)}>
                           Ver 3D
                         </button>
                         {esAdmin && (
-                          <button className="btn-sec text-red-700" onClick={() => desactivar(p)}>
+                          <button className="btn-sec !text-etiqueta" onClick={() => desactivar(p)}>
                             Quitar
                           </button>
                         )}
@@ -121,8 +132,8 @@ export default function Productos({ usuario }) {
                 })}
                 {productos.length === 0 && (
                   <tr>
-                    <td className="td text-stone-500" colSpan={6}>
-                      No hay productos para mostrar.
+                    <td className="td text-stone-500" colSpan={5}>
+                      No hay productos con ese nombre. Prueba con otra palabra o con el código.
                     </td>
                   </tr>
                 )}
@@ -133,35 +144,55 @@ export default function Productos({ usuario }) {
 
         <div>
           {seleccion ? (
-            <Suspense fallback={<p className="text-sm text-stone-500">Cargando visor 3D...</p>}>
+            <Suspense fallback={<p className="text-base text-stone-600">Cargando visor 3D...</p>}>
               <Producto3D producto={seleccion} />
             </Suspense>
           ) : (
-            <div className="card text-sm text-stone-500">Elige un producto para verlo en 3D.</div>
+            <div className="panel text-base text-stone-600">Elige un producto de la lista para verlo en 3D.</div>
           )}
         </div>
       </div>
 
       {esAdmin && (
-        <form onSubmit={guardar} className="card">
-          <h3 className="mb-3 font-semibold">Registrar producto</h3>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <input className="input" placeholder="Código" value={form.codigo} onChange={cambiar("codigo")} required />
-            <input className="input sm:col-span-2" placeholder="Nombre" value={form.nombre} onChange={cambiar("nombre")} required />
-            <input className="input" placeholder="Categoría" value={form.categoria} onChange={cambiar("categoria")} />
-            <input className="input" placeholder="Unidad (bolsa, metro, kilo...)" value={form.unidad_medida} onChange={cambiar("unidad_medida")} />
-            <input className="input" type="number" min="0" step="0.01" placeholder="Precio compra" value={form.precio_compra} onChange={cambiar("precio_compra")} />
-            <input className="input" type="number" min="0" step="0.01" placeholder="Precio venta" value={form.precio_venta} onChange={cambiar("precio_venta")} />
-            <input className="input" type="number" min="0" placeholder="Stock inicial" value={form.stock_actual} onChange={cambiar("stock_actual")} />
-            <input className="input" type="number" min="0" placeholder="Stock mínimo" value={form.stock_minimo} onChange={cambiar("stock_minimo")} />
+        <form onSubmit={guardar} className="panel">
+          <h3 className="subtitulo mb-4">Registrar producto</h3>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Campo etiqueta="Código">
+              <input className="input" value={form.codigo} onChange={cambiar("codigo")} required />
+            </Campo>
+            <Campo etiqueta="Nombre" className="sm:col-span-2">
+              <input className="input" value={form.nombre} onChange={cambiar("nombre")} required />
+            </Campo>
+            <Campo etiqueta="Categoría">
+              <input className="input" value={form.categoria} onChange={cambiar("categoria")} />
+            </Campo>
+            <Campo etiqueta="Unidad (bolsa, metro, kilo...)">
+              <input className="input" value={form.unidad_medida} onChange={cambiar("unidad_medida")} />
+            </Campo>
+            <Campo etiqueta="Precio de compra (Bs)">
+              <input className="input" type="number" min="0" step="0.01" value={form.precio_compra} onChange={cambiar("precio_compra")} />
+            </Campo>
+            <Campo etiqueta="Precio de venta (Bs)">
+              <input className="input" type="number" min="0" step="0.01" value={form.precio_venta} onChange={cambiar("precio_venta")} />
+            </Campo>
+            <Campo etiqueta="Stock inicial">
+              <input className="input" type="number" min="0" value={form.stock_actual} onChange={cambiar("stock_actual")} />
+            </Campo>
+            <Campo etiqueta="Stock mínimo">
+              <input className="input" type="number" min="0" value={form.stock_minimo} onChange={cambiar("stock_minimo")} />
+            </Campo>
+            <div className="flex items-end">
+              <button className="btn w-full">Guardar producto</button>
+            </div>
           </div>
-          <div className="mt-3 flex items-center gap-3">
-            <button className="btn">Guardar producto</button>
-            {ok && <span className="text-sm text-green-700">{ok}</span>}
-          </div>
+          {ok && (
+            <p role="status" className="aviso-ok mt-4">
+              {ok}
+            </p>
+          )}
         </form>
       )}
-      {error && <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="aviso-error">{error}</p>}
     </div>
   );
 }

@@ -39,21 +39,22 @@ export default function Inventario({ usuario }) {
     }
   };
 
-  const color = { ENTRADA: "bg-green-100 text-green-700", SALIDA: "bg-red-100 text-red-700", AJUSTE: "bg-amber-100 text-amber-800" };
+  const color = { ENTRADA: "bg-cal/10 text-cal", SALIDA: "bg-etiqueta/10 text-etiqueta", AJUSTE: "bg-obra/30 text-carbon" };
 
   return (
     <div className="space-y-6">
-      <div className="card">
-        <h2 className="mb-2 text-lg font-bold">Productos con stock bajo</h2>
+      <h2 className="titulo-pagina !mb-0">Inventario</h2>
+      <div className="panel">
+        <h3 className="subtitulo mb-2">Productos con stock bajo</h3>
         {bajos.length === 0 ? (
-          <p className="text-sm text-green-700">Todos los productos tienen stock suficiente.</p>
+          <p className="text-base text-cal">Todos los productos tienen stock suficiente.</p>
         ) : (
-          <ul className="divide-y divide-stone-100">
+          <ul className="divide-y divide-tinta-linea/60">
             {bajos.map((p) => (
-              <li key={p.id} className="flex justify-between py-2 text-sm">
+              <li key={p.id} className="flex justify-between gap-3 py-2.5 text-base">
                 <span>{p.nombre}</span>
-                <span className="font-semibold text-red-700">
-                  {p.stock_actual} / mínimo {p.stock_minimo}
+                <span className="font-semibold text-etiqueta">
+                  {p.stock_actual} de mínimo {p.stock_minimo}
                 </span>
               </li>
             ))}
@@ -63,10 +64,10 @@ export default function Inventario({ usuario }) {
 
       {esAdmin && (
         <>
-          <form onSubmit={ajustar} className="card">
-            <h3 className="mb-3 font-semibold">Ajustar stock (conteo físico)</h3>
-            <div className="grid gap-3 sm:grid-cols-4">
-              <select className="input sm:col-span-2" value={ajuste.producto_id} onChange={(e) => setAjuste({ ...ajuste, producto_id: e.target.value })} required>
+          <form onSubmit={ajustar} className="panel">
+            <h3 className="subtitulo mb-3">Ajustar stock después de contar</h3>
+            <div className="grid items-end gap-3 sm:grid-cols-4">
+              <select className="input sm:col-span-2" aria-label="Producto" value={ajuste.producto_id} onChange={(e) => setAjuste({ ...ajuste, producto_id: e.target.value })} required>
                 <option value="">Elige un producto...</option>
                 {productos.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -74,17 +75,17 @@ export default function Inventario({ usuario }) {
                   </option>
                 ))}
               </select>
-              <input className="input" type="number" min="0" placeholder="Stock real" value={ajuste.stock_nuevo} onChange={(e) => setAjuste({ ...ajuste, stock_nuevo: e.target.value })} required />
+              <input className="input" type="number" min="0" placeholder="Stock real" aria-label="Stock real" value={ajuste.stock_nuevo} onChange={(e) => setAjuste({ ...ajuste, stock_nuevo: e.target.value })} required />
               <button className="btn">Ajustar</button>
             </div>
-            {ok && <p className="mt-2 text-sm text-green-700">{ok}</p>}
-            {error && <p className="mt-2 text-sm text-red-700">{error}</p>}
+            {ok && <p role="status" className="aviso-ok mt-3">{ok}</p>}
+            {error && <p role="alert" className="aviso-error mt-3">{error}</p>}
           </form>
 
-          <div className="card">
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <h3 className="font-semibold">Kardex (movimientos de inventario)</h3>
-              <select className="input max-w-xs" value={filtro} onChange={(e) => setFiltro(e.target.value)}>
+          <div className="panel">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+              <h3 className="subtitulo">Kardex: todos los movimientos</h3>
+              <select className="input max-w-xs" aria-label="Filtrar por producto" value={filtro} onChange={(e) => setFiltro(e.target.value)}>
                 <option value="">Todos los productos</option>
                 {productos.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -95,7 +96,7 @@ export default function Inventario({ usuario }) {
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="border-b border-stone-200">
+                <thead>
                   <tr>
                     <th className="th">Fecha</th>
                     <th className="th">Producto</th>
@@ -106,24 +107,24 @@ export default function Inventario({ usuario }) {
                     <th className="th">Referencia</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-stone-100">
+                <tbody className="divide-y divide-tinta-linea/60">
                   {kardex.map((m) => (
                     <tr key={m.id}>
-                      <td className="td whitespace-nowrap text-xs">{new Date(m.fecha + "Z").toLocaleString()}</td>
+                      <td className="td whitespace-nowrap text-sm">{new Date(m.fecha + "Z").toLocaleString()}</td>
                       <td className="td">{m.producto_nombre}</td>
                       <td className="td">
-                        <span className={`rounded px-2 py-0.5 text-xs font-semibold ${color[m.tipo]}`}>{m.tipo}</span>
+                        <span className={`chip ${color[m.tipo]}`}>{m.tipo}</span>
                       </td>
                       <td className="td text-right">{m.cantidad}</td>
                       <td className="td text-right">{m.stock_anterior}</td>
                       <td className="td text-right">{m.stock_nuevo}</td>
-                      <td className="td text-xs">{m.referencia}</td>
+                      <td className="td text-sm text-stone-600">{m.referencia}</td>
                     </tr>
                   ))}
                   {kardex.length === 0 && (
                     <tr>
                       <td className="td text-stone-500" colSpan={7}>
-                        Sin movimientos todavía.
+                        Todavía no hay movimientos. Se crean al registrar una compra, una venta o un ajuste.
                       </td>
                     </tr>
                   )}

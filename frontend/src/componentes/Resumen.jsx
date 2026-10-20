@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 import api, { bs, mensajeError } from "../api.js";
 
-function Tarjeta({ titulo, valor, detalle }) {
+function Dato({ titulo, valor, detalle, alerta }) {
   return (
-    <div className="card">
-      <p className="text-xs uppercase tracking-wide text-stone-500">{titulo}</p>
-      <p className="mt-1 text-2xl font-bold text-marca-oscuro">{valor}</p>
-      {detalle && <p className="text-xs text-stone-500">{detalle}</p>}
+    <div className="px-5 py-4">
+      <p className="text-base text-tinta">{titulo}</p>
+      <p className={`font-titulo text-5xl font-bold ${alerta ? "text-etiqueta" : "text-tinta-oscuro"}`}>{valor}</p>
+      {detalle && <p className="text-base text-stone-600">{detalle}</p>}
     </div>
   );
 }
 
-export default function Resumen() {
+export default function Resumen({ ir }) {
   const [datos, setDatos] = useState(null);
   const [error, setError] = useState("");
 
@@ -22,27 +22,55 @@ export default function Resumen() {
       .catch((e) => setError(mensajeError(e)));
   }, []);
 
-  if (error) return <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>;
-  if (!datos) return <p className="text-sm text-stone-500">Cargando resumen...</p>;
+  if (error) return <p role="alert" className="aviso-error">{error}</p>;
+  if (!datos) return <p className="text-base text-stone-600">Cargando resumen...</p>;
+
+  const maximo = Math.max(1, ...datos.mas_vendidos.map((p) => p.unidades));
+  const hayBajos = datos.productos_stock_bajo > 0;
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-bold">Resumen de los últimos {datos.dias} días</h2>
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Tarjeta titulo="Ventas" valor={bs(datos.ventas.total)} detalle={`${datos.ventas.cantidad} ventas`} />
-        <Tarjeta titulo="Compras" valor={bs(datos.compras.total)} detalle={`${datos.compras.cantidad} compras`} />
-        <Tarjeta titulo="Productos con stock bajo" valor={datos.productos_stock_bajo} detalle="Revisar en Inventario" />
+    <div className="space-y-6">
+      <h2 className="titulo-pagina !mb-0">Resumen de los últimos {datos.dias} días</h2>
+
+      <div className="panel grid divide-y divide-tinta-linea !p-0 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+        <Dato titulo="Ventas" valor={bs(datos.ventas.total)} detalle={`${datos.ventas.cantidad} ventas`} />
+        <Dato titulo="Compras" valor={bs(datos.compras.total)} detalle={`${datos.compras.cantidad} compras`} />
+        <Dato
+          titulo="Productos con stock bajo"
+          valor={datos.productos_stock_bajo}
+          alerta={hayBajos}
+          detalle={
+            hayBajos ? (
+              <button onClick={() => ir("inventario")} className="font-semibold text-tinta underline underline-offset-2">
+                Ver cuáles en Inventario
+              </button>
+            ) : (
+              "Todo tiene stock suficiente"
+            )
+          }
+        />
       </div>
-      <div className="card">
-        <h3 className="mb-2 font-semibold">Productos más vendidos</h3>
+
+      <div className="panel">
+        <h3 className="subtitulo mb-3">Productos más vendidos</h3>
         {datos.mas_vendidos.length === 0 ? (
-          <p className="text-sm text-stone-500">Todavía no hay ventas en este periodo.</p>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-base text-stone-600">Todavía no hay ventas en estos {datos.dias} días.</p>
+            <button onClick={() => ir("ventas")} className="btn">
+              Registrar una venta
+            </button>
+          </div>
         ) : (
-          <ul className="divide-y divide-stone-100">
+          <ul className="space-y-3">
             {datos.mas_vendidos.map((p) => (
-              <li key={p.producto} className="flex justify-between py-2 text-sm">
-                <span>{p.producto}</span>
-                <span className="font-medium">{p.unidades} unidades</span>
+              <li key={p.producto}>
+                <div className="flex justify-between gap-3 text-base">
+                  <span>{p.producto}</span>
+                  <span className="font-semibold">{p.unidades} unidades</span>
+                </div>
+                <div className="mt-1 h-2.5 rounded-[2px] bg-tinta-claro">
+                  <div className="h-2.5 rounded-[2px] bg-tinta" style={{ width: `${(p.unidades / maximo) * 100}%` }} />
+                </div>
               </li>
             ))}
           </ul>

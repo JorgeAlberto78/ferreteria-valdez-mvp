@@ -31,10 +31,10 @@ function ListaSimple({ titulo, ruta, campos, columnas }) {
 
   return (
     <div className="grid gap-6 lg:grid-cols-3">
-      <div className="card lg:col-span-2">
-        <h2 className="mb-3 text-lg font-bold">{titulo}</h2>
+      <div className="panel lg:col-span-2">
+        <h2 className="titulo-pagina">{titulo}</h2>
         <table className="w-full">
-          <thead className="border-b border-stone-200">
+          <thead>
             <tr>
               {columnas.map((c) => (
                 <th key={c.nombre} className="th">
@@ -43,7 +43,7 @@ function ListaSimple({ titulo, ruta, campos, columnas }) {
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-stone-100">
+          <tbody className="divide-y divide-tinta-linea/60">
             {filas.map((f) => (
               <tr key={f.id}>
                 {columnas.map((c) => (
@@ -56,7 +56,7 @@ function ListaSimple({ titulo, ruta, campos, columnas }) {
             {filas.length === 0 && (
               <tr>
                 <td className="td text-stone-500" colSpan={columnas.length}>
-                  Todavía no hay registros.
+                  Todavía no hay registros. Agrega el primero con el formulario.
                 </td>
               </tr>
             )}
@@ -64,21 +64,22 @@ function ListaSimple({ titulo, ruta, campos, columnas }) {
         </table>
       </div>
 
-      <form onSubmit={guardar} className="card space-y-3">
-        <h3 className="font-semibold">Agregar</h3>
+      <form onSubmit={guardar} className="panel h-fit space-y-4">
+        <h3 className="subtitulo">Agregar</h3>
         {campos.map((c) => (
-          <input
-            key={c.nombre}
-            className="input"
-            placeholder={c.etiqueta}
-            value={form[c.nombre]}
-            onChange={(e) => setForm({ ...form, [c.nombre]: e.target.value })}
-            required={c.requerido}
-          />
+          <div key={c.nombre}>
+            <label className="label">{c.etiqueta}</label>
+            <input
+              className="input"
+              value={form[c.nombre]}
+              onChange={(e) => setForm({ ...form, [c.nombre]: e.target.value })}
+              required={c.requerido}
+            />
+          </div>
         ))}
         <button className="btn w-full">Guardar</button>
-        {ok && <p className="text-sm text-green-700">{ok}</p>}
-        {error && <p className="text-sm text-red-700">{error}</p>}
+        {ok && <p role="status" className="aviso-ok">{ok}</p>}
+        {error && <p role="alert" className="aviso-error">{error}</p>}
       </form>
     </div>
   );

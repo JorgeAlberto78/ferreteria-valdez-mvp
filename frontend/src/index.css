@@ -2,13 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer components {
-  .input { @apply w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm focus:border-marca focus:outline-none focus:ring-1 focus:ring-marca; }
-  .btn { @apply rounded-md bg-marca px-4 py-2 text-sm font-medium text-white hover:bg-marca-oscuro disabled:opacity-50; }
-  .btn-sec { @apply rounded-md border border-stone-300 bg-white px-3 py-1.5 text-sm text-stone-700 hover:bg-stone-100; }
-  .card { @apply rounded-lg border border-stone-200 bg-white p-4 shadow-sm; }
-  .th { @apply px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-stone-500; }
-  .td { @apply px-3 py-2 text-sm text-stone-800; }
+@layer base {
+  html {
+    font-size: 17px; /* un poco más grande: el sistema lo usan personas mayores */
+  }
+  body {
+    @apply bg-cemento font-sans text-carbon antialiased;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-titulo;
+  }
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px #fff, 0 0 0 5px #3f587a;
+  }
 }
 
-body { @apply bg-stone-100 text-stone-900; }
+@layer components {
+  /* Campos y botones */
+  .label { @apply mb-1 block text-sm font-medium text-tinta; }
+  .input { @apply h-11 w-full rounded-[4px] border border-tinta-linea bg-white px-3 text-base text-carbon placeholder:text-stone-400 focus:border-tinta; }
+  .btn { @apply inline-flex h-11 items-center justify-center rounded-[4px] bg-obra px-5 text-base font-semibold text-carbon shadow-[0_2px_0_0_#D9823A] hover:bg-[#FFB36B] active:translate-y-px active:shadow-none disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none; }
+  .btn-sec { @apply inline-flex h-9 items-center justify-center rounded-[4px] border border-tinta-linea bg-white px-3 text-sm font-medium text-tinta hover:bg-tinta-claro; }
+
+  /* Paneles y tablas */
+  .panel,
+  .card { @apply rounded-[4px] border border-tinta-linea/70 bg-white p-5; }
+  .th { @apply border-b-2 border-tinta px-3 py-2 text-left text-sm font-semibold text-tinta; }
+  .td { @apply px-3 py-3 text-base text-carbon; }
+
+  /* Títulos */
+  .titulo-pagina { @apply mb-5 text-4xl font-bold text-tinta-oscuro; }
+  .subtitulo { @apply text-2xl font-semibold text-tinta; }
+
+  /* Avisos */
+  .aviso-ok { @apply border-l-4 border-cal bg-cal/10 px-3 py-2 text-base text-carbon; }
+  .aviso-error { @apply border-l-4 border-etiqueta bg-etiqueta/10 px-3 py-2 text-base text-carbon; }
+
+  /* Etiquetas de estado (siempre llevan texto, no solo color) */
+  .chip { @apply inline-block whitespace-nowrap rounded-[3px] px-2 py-0.5 text-sm font-semibold; }
+
+  /* Nota de talonario: así se ven las ventas y compras, como la nota que ya usa la ferretería */
+  .nota { @apply overflow-hidden rounded-[4px] border border-tinta-linea bg-white; }
+  .nota-cabecera { @apply flex flex-wrap items-baseline justify-between gap-2 bg-tinta px-4 py-2 text-white; }
+  .nota-cabecera h2 { @apply text-2xl font-bold tracking-wide; }
+  .nota-tabla { @apply w-full border-collapse; }
+  .nota-tabla th { @apply bg-tinta-claro px-3 py-2 text-left font-titulo text-base font-semibold uppercase tracking-wide text-tinta; }
+  .nota-tabla td { height: 46px; @apply border-t border-tinta-linea px-3 text-base; }
+  .nota-tabla th + th,
+  .nota-tabla td + td { @apply border-l border-tinta-linea; }
+  .total-caja { @apply flex items-baseline justify-between gap-6 border-2 border-tinta px-4 py-2; }
+
+  /* Tablero con clavijas, como el de la ferretería */
+  .tablero {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.16) 2px, transparent 2.5px);
+    background-size: 28px 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
