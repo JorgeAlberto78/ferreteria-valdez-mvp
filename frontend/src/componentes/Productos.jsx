@@ -87,7 +87,14 @@ export default function Productos({ usuario }) {
         <div className="panel min-w-0">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h2 className="titulo-pagina !mb-0">Productos</h2>
-            <input className="input max-w-xs" placeholder="Buscar por nombre o código" aria-label="Buscar producto" value={buscar} onChange={(e) => setBuscar(e.target.value)} />
+            <div className="flex w-full max-w-sm items-center gap-2 sm:w-auto">
+              <input className="input" placeholder="Buscar por nombre o código" aria-label="Buscar producto" value={buscar} onChange={(e) => setBuscar(e.target.value)} />
+              {buscar && (
+                <button type="button" className="btn-sec h-11" onClick={() => setBuscar("")}>
+                  Limpiar
+                </button>
+              )}
+            </div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
